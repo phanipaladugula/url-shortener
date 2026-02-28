@@ -72,18 +72,28 @@ func redirectHandler(w http.ResponseWriter, r *http.Request){
 	}
 
 	SetCachedURL(shortCode,originalURL)
+	go func() {
+    clickInfo := ClickData{
+        ShortCode: shortCode,
+        IP:        r.RemoteAddr,
+        UA:        r.UserAgent(),
+    }
+    ProduceClickEvent(clickInfo)
+	}()
 	http.Redirect(w,r,originalURL,http.StatusFound)
 
 }
 func main(){
 	initDB()
 	initRedis()
+	initKafka()
+	go StartAnalyticsWorker() // Starts the background listener
 	defer dbPool.Close()
 
 	http.HandleFunc("/ping",pingHandler)
 	http.HandleFunc("/shorten",shortenHandler)
 	http.HandleFunc("/", redirectHandler)
-	
+
 	fmt.Println("Server running on port :8080")
 	http.ListenAndServe(":8080",nil)
 }
