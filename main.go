@@ -47,14 +47,43 @@ func shortenHandler(w http.ResponseWriter, r *http.Request){
 	json.NewEncoder(w).Encode(resp)
 
 }
+
+func redirectHandler(w http.ResponseWriter, r *http.Request){
+	shortCode:=r.URL.Path[1:]
+	if shortCode == ""{
+		http.NotFound(w,r)
+		return
+	}
+
+	val,err:=GetCachedURL(shortCode)
+	if err == nil{
+		fmt.Println("Cache Hit ! Serving from Redis")
+		http.Redirect(w,r,val,http.StatusFound)
+		return
+	}
+
+	fmt.Println("Cache Miss! Serving from PostgresSQL")
+	var originalURL string
+	err = dbPool.QueryRow(r.Context(),"SELECT original_url FROM urls WHERE short_code = $1", shortCode).Scan(&originalURL)
+
+	if err != nil{
+		http.NotFound(w,r)
+		return
+	}
+
+	SetCachedURL(shortCode,originalURL)
+	http.Redirect(w,r,originalURL,http.StatusFound)
+
+}
 func main(){
 	initDB()
-
+	initRedis()
 	defer dbPool.Close()
 
 	http.HandleFunc("/ping",pingHandler)
 	http.HandleFunc("/shorten",shortenHandler)
-
+	http.HandleFunc("/", redirectHandler)
+	
 	fmt.Println("Server running on port :8080")
 	http.ListenAndServe(":8080",nil)
 }
