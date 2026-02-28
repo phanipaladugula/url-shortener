@@ -1,0 +1,5 @@
+bin/
+obj/
+.git/
+stress_test.js
+*.exe

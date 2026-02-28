@@ -11,8 +11,10 @@ import(
 var dbPool *pgxpool.Pool
 
 func initDB(){
-	connStr:="postgres://postgres:Phani@123@localhost:5432/postgres"
-
+	connStr := os.Getenv("DB_URL")
+    if connStr == "" {
+        connStr = "postgres://postgres:Phani@123@localhost:5432/postgres"
+    }
 	var err error
 	dbPool, err = pgxpool.New(context.Background(),connStr)
 

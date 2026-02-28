@@ -4,7 +4,7 @@ import(
 	"context"
 	"fmt"
 	"encoding/json"
-
+	"os"
 	"github.com/segmentio/kafka-go"
 )
 
@@ -18,8 +18,12 @@ type ClickData struct{
 var kafkaWriter *kafka.Writer
 
 func initKafka(){
+	addr := os.Getenv("KAFKA_URL")
+    if addr == "" {
+        addr = "localhost:9092"
+    }
 	kafkaWriter  = &kafka.Writer{
-		Addr:kafka.TCP("localhost:9092"),
+		Addr:kafka.TCP(addr),
 		Topic: "click-events",
 		Balancer: &kafka.LeastBytes{},
 	}
