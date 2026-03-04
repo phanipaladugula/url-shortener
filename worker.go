@@ -21,7 +21,7 @@ func StartAnalyticsWorker(){
 	for {
 		m,err:=reader.ReadMessage(context.Background())
 		if err != nil{
-			fmt.Println("Error reading message: ",err)
+			fmt.Println("Error	 reading message: ",err)
 			time.Sleep(5*time.Second)
 			continue
 		}
