@@ -38,7 +38,7 @@ func ProduceClickEvent(data ClickData){
 			Value: payload,
 		})
 	if err != nil{
-		fmt.Println("Could not write message into Kafka: ",err)
+		fmt.Println("Could not write message to Kafka: ",err)
 	}
 }
 
